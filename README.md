@@ -35,12 +35,12 @@ By implementing these operators, a 3D geometric representation of many polyhedra
 	- *j* join, *n* needle, *z* zip, *t* truncate, *o* ortho, *e* expand, *s* snub, *m* meta, *b* bevel are processed as combinations of the implemented operators
 
 ## Implementation Contents
-- Window generation for displaying results, built with SDL2
-- Shader library for producing the graphical representation, built with OpenGL 3.3 Core Profile & GLSL
-- Polyhedra mesh generation & storage for processing the notation operator stream
-- Model storage for processing object shader data
-- Camera library for navigating the 3D scene, built with GLM
-- Utility libraries for inputting main function arguments, generating console statements for debugging, and file accessing of shader source files
+- *Window generation* for displaying results, built with SDL2
+- *Shader library* for producing the graphical representation, built with OpenGL 3.3 Core Profile & GLSL
+- *Polyhedra mesh generation & storage* for processing the notation operator stream
+- *Model storage* for processing object shader data
+- *Camera library* for navigating the 3D scene, built with GLM
+- *Utility libraries* for inputting main function arguments, generating console statements for debugging, and file accessing of shader source files
 
 ## What To Add Next
 - *Operators*: indexed and non-original operators allow more polyhedra to be generated
