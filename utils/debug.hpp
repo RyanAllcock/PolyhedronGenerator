@@ -5,7 +5,7 @@
 #include <vector> // vector data
 #include <array> // array data
 
-#define DEBUG 0
+#define DEBUG if(0)
 
 namespace{
 	template <typename T, std::size_t U>
@@ -26,7 +26,7 @@ namespace{
 }
 
 template <typename T> inline void debug(std::string const &str, std::vector<std::vector<T>> const &data){
-	if(DEBUG){
+	DEBUG{
 		std::cerr << str << ": [";
 		for(std::vector<T> const &d : data) std::cerr << "\n" << d;
 		std::cerr << "]\n";
@@ -34,7 +34,7 @@ template <typename T> inline void debug(std::string const &str, std::vector<std:
 }
 
 template <typename T, std::size_t U> inline void debug(std::string const &str, std::vector<T> const &data){
-	if(DEBUG){
+	DEBUG{
 		std::cerr << str << ": [";
 		for(int d = 0; d < data.size(); d += U){
 			std::array<T, U> bunch;
@@ -46,11 +46,11 @@ template <typename T, std::size_t U> inline void debug(std::string const &str, s
 }
 
 template <typename T> inline void debug(std::string const &str, T data){
-	if(DEBUG) std::cerr << str << ": " << data << "\n";
+	DEBUG std::cerr << str << ": " << data << "\n";
 }
 
 template <typename T> inline void debug(T data){
-	if(DEBUG) std::cerr << data << "\n";
+	DEBUG std::cerr << data << "\n";
 }
 
 #endif
