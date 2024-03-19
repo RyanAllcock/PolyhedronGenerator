@@ -1,6 +1,8 @@
 # Polyhedron Generator
 This repository represents a C++ implementation of the Conway Polyhedron Notation, allowing such polyhedra to be generated in a 3D space.
 
+![dckcscO](https://github.com/RyanAllcock/PolyhedronGenerator/assets/133653065/4121f4ff-f90f-4f1c-98e7-311ddae99682)
+
 ## General Description
 Conway's Polyhedron Notation is a method for generating complex polyhedra by performing a set of operations on a seed polyhedron. This allows vastly complicated polyhedra, or polyhedral graphs, to be automatically produced either geometrically or topologically.
 
