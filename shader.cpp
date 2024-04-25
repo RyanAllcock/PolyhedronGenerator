@@ -123,6 +123,10 @@ DrawArray::~DrawArray(){
 	glDeleteVertexArrays(1, &id);
 }
 
+void DrawArray::recount(GLsizei n){
+	count = n;
+}
+
 DrawElements::DrawElements(DrawMode m, std::vector<Index*> const &ivs, Index const &ie, GLsizei n) : DrawArray(m, ivs, n), type(ie.type) {
 	glBindVertexArray(id);
 	ie.bind(GL_ELEMENT_ARRAY_BUFFER);

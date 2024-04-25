@@ -50,6 +50,7 @@ class PolyhedronFactory{
 	// usage
 public:
 	static std::vector<Polyhedron> make(std::string ops);
+	static void mutate(Polyhedron &p, char op);
 };
 
 #endif

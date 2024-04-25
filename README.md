@@ -25,6 +25,8 @@ By implementing these operators, a 3D geometric representation of many polyhedra
 	- *e* switch to pivot camera mode
 	- *tab* switch to free camera mode
 	- *alt* exit window focus
+	- *c v b n m* add *c d a k g* operators to stream, respectively
+	- *x* remove last dynamically-added operator from stream
 
 ## Compilation & Running Requirements
 - Ensure MinGW compiler or compatible alternative is installed and accessible within the folder's environment

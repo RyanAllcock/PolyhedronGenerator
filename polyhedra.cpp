@@ -409,27 +409,37 @@ std::vector<Polyhedron> PolyhedronFactory::make(std::string ops){
 	// operations
 	while(it != ops.rend()){
 		debug("current operator", *it);
-		switch(*it++){
+		char op = *it++;
+		switch(op){
 			case 'T':
 				polys.push_back(Polyhedron()); // mesh assumptions: edge pairs are sorted lowest-highest index; faces are in winding order
 				tetrahedron(polys.back());
 				break;
-			case 'd':
-				duality(polys.back());
-				break;
-			case 'a':
-				rectify(polys.back());
-				break;
-			case 'k':
-				akisate(polys.back());
-				break;
-			case 'g':
-				gyrate(polys.back());
-				break;
-			case 'c':
-				canonicalize(polys.back().vertices, polys.back().edges, polys.back().faces, 10);
+			default:
+				mutate(polys.back(), op);
 				break;
 		}
 	}
 	return polys;
+}
+
+void PolyhedronFactory::mutate(Polyhedron &p, char op){
+	switch(op){
+		case 'd':
+			duality(p);
+			break;
+		case 'a':
+			rectify(p);
+			break;
+		case 'k':
+			akisate(p);
+			break;
+		case 'g':
+			gyrate(p);
+			break;
+		case 'c':
+			canonicalize(p.vertices, p.edges, p.faces, 10);
+			break;
+	}
+	debug("new polyhedron count", std::vector<std::size_t>{p.vertices.size(), p.edges.size(), p.faces.size()});
 }

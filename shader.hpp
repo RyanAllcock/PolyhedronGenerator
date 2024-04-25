@@ -108,6 +108,7 @@ struct DrawArray{
 	DrawArray(DrawMode m, std::vector<Index*> const &ivs, GLsizei n);
 	~DrawArray();
 	virtual void call() const;
+	void recount(GLsizei n);
 };
 struct DrawElements : DrawArray{
 	GLenum type;

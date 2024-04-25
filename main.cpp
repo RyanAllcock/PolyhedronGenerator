@@ -6,6 +6,7 @@
 #include "utils/argument.hpp" // argument fetching
 #include "utils/debug.hpp" // debugging
 #include "utils/filemanager.hpp" // file fetching
+#include "utils/maths.hpp" // model rotation
 
 #include <vector> // mesh data
 #include <array> // data passing
@@ -22,13 +23,22 @@
 #define PROJECTION_NEAR .1f
 #define PROJECTION_FAR 100.f
 
+#define MODEL_ROTATE_SENS .05f
+#define MODEL_MAX_VERTICES 10000
+#define MODEL_MAX_FACES 10000
+#define MODEL_MAX_LINES 10000
+#define MODEL_MAX_WHEEL_FACES 20000
+
 // indexing
 enum ProgramInput{
 	InputForward, InputBackward, InputLeft, InputRight, InputUp, InputDown,  // movement
 	InputSelect, InputRelease, InputProject, // camera
-	InputFocus, InputSpin, // mouse
+	InputFocus, InputTurn, // mouse
 	InputGraphic,  // shader
-	InputTabout // window
+	InputTabout, // window
+	InputSpin, // model
+	InputDual, InputAmbo, InputAkis, InputGyro, InputCanon, // operators
+	InputRevert // polyhedron
 };
 enum ArgumentType{
 	ArgumentOperators, // operator stream
@@ -70,15 +80,15 @@ int main(int argc, char *argv[]){
 	
 	// shape
 	std::vector<Mesh> polyhedra;
+	std::vector<Polyhedron> polydata = PolyhedronFactory::make(operators);
 	{
-	std::vector<Polyhedron> const polydata = PolyhedronFactory::make(operators);
 	for(Polyhedron poly : polydata) polyhedra.push_back(Mesh(poly.vertices, poly.edges, poly.faces));
 	if(polyhedra.empty()){
 		debug("Error: no polyhedra generated from stream");
 		return -1;
 	}
 	}
-	Mesh &polyhedron = polyhedra.front();
+	Mesh &polyhedron = polyhedra.back();
 	debug("shape", polyhedron);
 	
 	// window
@@ -86,9 +96,10 @@ int main(int argc, char *argv[]){
 	InputBind input(window.getMouseMotionHandle(), window.getMousePositionHandle());
 	input.bindAll(std::vector<std::pair<int, WindowKey>>{
 		{InputForward, KeyW}, {InputBackward, KeyS}, {InputLeft, KeyA}, {InputRight, KeyD}, {InputUp, KeySpace}, {InputDown, KeyLeftControl}, 
-		{InputSelect, KeyE}, {InputRelease, KeyTab}, {InputProject, KeyP}, {InputGraphic, KeyG}, {InputTabout, KeyLeftAlt}}, window);
+		{InputSelect, KeyE}, {InputRelease, KeyTab}, {InputProject, KeyP}, {InputGraphic, KeyG}, {InputTabout, KeyLeftAlt}, 
+		{InputSpin, KeyR}, {InputDual, KeyV}, {InputAmbo, KeyB}, {InputAkis, KeyN}, {InputGyro, KeyM}, {InputCanon, KeyC}, {InputRevert, KeyX}}, window);
 	input.bindAll(std::vector<std::pair<int, WindowButton>>{
-		{InputFocus, MouseLeftClick}, {InputSpin, MouseRightClick}}, window);
+		{InputFocus, MouseLeftClick}, {InputTurn, MouseRightClick}}, window);
 	
 	// camera
 	Camera camera(std::array<float, 3>{0.f, 0.f, 2.f}, CAMERA_ROTATE_SENS, CAMERA_MOVE_SENS);
@@ -114,23 +125,21 @@ int main(int argc, char *argv[]){
 	}
 	
 	// renderer components
-	Buffer vertexBuffer(BufferStatic, polyhedron.getSerialVertices().data(), sizeof(float) * polyhedron.getSerialVertices().size());
-	Buffer triangleBuffer(BufferStatic, polyhedron.getTriangularFaces().data(), sizeof(int) * polyhedron.getTriangularFaces().size());
-	Buffer lineBuffer(BufferStatic, polyhedron.getSerialEdges().data(), sizeof(int) * polyhedron.getSerialEdges().size());
-	Buffer wheelBuffer(BufferStatic, polyhedron.getSerialVertices().data(), sizeof(float) * (polyhedron.getSerialVertices().size() + polyhedron.getFanCentreVertices().size()));
-	wheelBuffer.update(polyhedron.getFanCentreVertices().data(), sizeof(float) * polyhedron.getFanCentreVertices().size(), sizeof(float) * polyhedron.getSerialVertices().size());
-	Buffer wheelElementBuffer(BufferStatic, polyhedron.getFanFaces().data(), sizeof(int) * polyhedron.getFanFaces().size());
+	Buffer vertexBuffer(BufferStatic, polyhedron.getSerialVertices().data(), sizeof(float) * MODEL_MAX_VERTICES * 3);
+	vertexBuffer.update(polyhedron.getFanCentreVertices().data(), sizeof(float) * polyhedron.getFanCentreVertices().size(), sizeof(float) * polyhedron.getSerialVertices().size());
+	Buffer triangleBuffer(BufferStatic, polyhedron.getTriangularFaces().data(), sizeof(int) * MODEL_MAX_FACES);
+	Buffer lineBuffer(BufferStatic, polyhedron.getSerialEdges().data(), sizeof(int) * MODEL_MAX_LINES);
+	Buffer wheelBuffer(BufferStatic, polyhedron.getFanFaces().data(), sizeof(int) * MODEL_MAX_WHEEL_FACES);
 	Index vertexIndex(vertexBuffer, 3, IndexFloat, IndexUnchanged, sizeof(float) * 3, 0);
 	Index triangleIndex(triangleBuffer, IndexUint, sizeof(int), 0);
 	Index lineIndex(lineBuffer, IndexUint, sizeof(int), 0);
-	Index wheelIndex(wheelBuffer, 3, IndexFloat, IndexUnchanged, sizeof(float) * 3, 0);
-	Index wheelElementIndex(wheelElementBuffer, IndexUint, sizeof(int), 0);
+	Index wheelIndex(wheelBuffer, IndexUint, sizeof(int), 0);
 	Program basicProgram(std::vector<Shader*>{ &vertexShader, &fragmentShader });
 	Program solidwireProgram(std::vector<Shader*>{ &vertexShader, &solidwireGeometryShader, &solidwireFragmentShader });
 	DrawArray pointDraw(DrawPoint, std::vector<Index*>{ &vertexIndex }, polyhedron.getSerialVertices().size() / 3);
 	DrawElements triangleDraw(DrawTriangle, std::vector<Index*>{ &vertexIndex }, triangleIndex, polyhedron.getTriangularFaces().size());
 	DrawElements lineDraw(DrawLine, std::vector<Index*>{ &vertexIndex }, lineIndex, polyhedron.getSerialEdges().size());
-	DrawElements solidwireDraw(DrawTriangle, std::vector<Index*>{ &wheelIndex }, wheelElementIndex, polyhedron.getFanFaces().size());
+	DrawElements solidwireDraw(DrawTriangle, std::vector<Index*>{ &vertexIndex }, wheelIndex, polyhedron.getFanFaces().size());
 	
 	// renderers
 	std::list<Renderer> const renderers{
@@ -143,12 +152,23 @@ int main(int argc, char *argv[]){
 	std::advance(renderer, rendererId);
 	
 	// uniforms
-	std::array<float, 16> screenSpace;
-	screenSpace[0] = screenSpace[5] = screenSpace[10] = screenSpace[15] = 1;
+	std::array<float, 3> rotateNormal = {-1.f / sqrt(2), 1.f / sqrt(2), 0};
+	float rotateMagnitude = 0;
+	{
+	std::array<float, 16> screenSpace{
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1};
+	std::array<float, 16> viewProjection = camera.getViewProjection();
 	window.getScreenSpace(screenSpace[0], screenSpace[5], screenSpace[3], screenSpace[7]);
-	basicProgram.setUniform("vp", DataMatrix4(camera.getViewProjection(), DataUnchanged));
-	solidwireProgram.setUniform("vp", DataMatrix4(camera.getViewProjection(), DataUnchanged));
+	basicProgram.setUniform("vp", DataMatrix4(viewProjection, DataUnchanged));
+	solidwireProgram.setUniform("vp", DataMatrix4(viewProjection, DataUnchanged));
 	solidwireProgram.setUniform("screen", DataMatrix4(screenSpace, DataUnchanged));
+	std::array<float, 16> modelTransform = math::rotate(rotateMagnitude, rotateNormal);
+	basicProgram.setUniform("m", DataMatrix4(modelTransform, DataUnchanged));
+	solidwireProgram.setUniform("m", DataMatrix4(modelTransform, DataUnchanged));
+	}
 	
 	// loop
 	window.timer();
@@ -186,7 +206,7 @@ int main(int argc, char *argv[]){
 			float move[3] = { 0.f, 0.f, 0.f };
 			float look[2];
 			input.getMouseMotion(look);
-			camera.input(input.getPress(InputSelect), input.getHold(InputSpin), input.getPress(InputRelease), move, look);
+			camera.input(input.getPress(InputSelect), input.getHold(InputTurn), input.getPress(InputRelease), move, look);
 			
 			// view
 			basicProgram.setUniform("vp", DataMatrix4(camera.getViewProjection(), DataUnchanged));
@@ -207,15 +227,89 @@ int main(int argc, char *argv[]){
 				(float)(input.getHold(InputRight) - input.getHold(InputLeft)), 
 				(float)(input.getHold(InputUp) - input.getHold(InputDown)), 
 				(float)(input.getHold(InputForward) - input.getHold(InputBackward))};
-			camera.input(input.getPress(InputSelect), input.getHold(InputSpin), input.getPress(InputRelease), move, look);
+			camera.input(input.getPress(InputSelect), input.getHold(InputTurn), input.getPress(InputRelease), move, look);
 			
 			// view
-			if(input.getPress(InputGraphic) == 1){
+			if(input.getPress(InputGraphic)){
 				if(++renderer == renderers.end()) renderer = renderers.begin();
 			}
 			if(input.getPress(InputProject)){
 				projection.toggle();
 				projection.set(camera, window.getAspectRatio());
+			}
+			
+			// model
+			if(input.getHold(InputSpin)){
+				rotateMagnitude += MODEL_ROTATE_SENS;
+				std::array<float, 16> modelTransform = math::rotate(rotateMagnitude, rotateNormal);
+				basicProgram.setUniform("m", DataMatrix4(modelTransform, DataUnchanged));
+				solidwireProgram.setUniform("m", DataMatrix4(modelTransform, DataUnchanged));
+			}
+			
+			// polyhedron
+			bool isMeshChanged = false;
+			if(input.getPress(InputDual)){
+				debug("Operator dual & reset testing");
+				polydata.push_back(polydata.back()); // operate on polyhedron
+				PolyhedronFactory::mutate(polydata.back(), 'd');
+				polyhedra.push_back(Mesh(polydata.back().vertices, polydata.back().edges, polydata.back().faces));
+				operators = "d" + operators;
+				isMeshChanged = true;
+			}
+			if(input.getPress(InputAmbo)){
+				debug("Operator ambo");
+				polydata.push_back(polydata.back());
+				PolyhedronFactory::mutate(polydata.back(), 'a');
+				polyhedra.push_back(Mesh(polydata.back().vertices, polydata.back().edges, polydata.back().faces));
+				operators = "a" + operators;
+				isMeshChanged = true;
+			}
+			if(input.getPress(InputAkis)){
+				debug("Operator akis");
+				polydata.push_back(polydata.back());
+				PolyhedronFactory::mutate(polydata.back(), 'k');
+				polyhedra.push_back(Mesh(polydata.back().vertices, polydata.back().edges, polydata.back().faces));
+				operators = "k" + operators;
+				isMeshChanged = true;
+			}
+			if(input.getPress(InputGyro)){
+				debug("Operator gyro");
+				polydata.push_back(polydata.back());
+				PolyhedronFactory::mutate(polydata.back(), 'g');
+				polyhedra.push_back(Mesh(polydata.back().vertices, polydata.back().edges, polydata.back().faces));
+				operators = "g" + operators;
+				isMeshChanged = true;
+			}
+			if(input.getPress(InputCanon)){
+				debug("Operator canon");
+				polydata.push_back(polydata.back());
+				PolyhedronFactory::mutate(polydata.back(), 'c');
+				polyhedra.push_back(Mesh(polydata.back().vertices, polydata.back().edges, polydata.back().faces));
+				operators = "c" + operators;
+				isMeshChanged = true;
+			}
+			if(input.getPress(InputRevert)){
+				if(polyhedra.size() > 1){
+					polyhedra.pop_back();
+					polydata.pop_back();
+					operators.erase(operators.begin());
+					isMeshChanged = true;
+				}
+			}
+			if(isMeshChanged){ // update buffers
+				Mesh &mesh = polyhedra.back();
+				vertexBuffer.update(mesh.getSerialVertices().data(), sizeof(float) * mesh.getSerialVertices().size(), 0);
+				vertexBuffer.update(mesh.getFanCentreVertices().data(), sizeof(float) * mesh.getFanCentreVertices().size(), 
+					sizeof(float) * mesh.getSerialVertices().size());
+				triangleBuffer.update(mesh.getTriangularFaces().data(), sizeof(int) * mesh.getTriangularFaces().size(), 0);
+				lineBuffer.update(mesh.getSerialEdges().data(), sizeof(int) * mesh.getSerialEdges().size(), 0);
+				wheelBuffer.update(mesh.getFanFaces().data(), sizeof(int) * mesh.getFanFaces().size(), 0);
+				pointDraw.recount(mesh.getSerialVertices().size() / 3);
+				triangleDraw.recount(mesh.getTriangularFaces().size());
+				lineDraw.recount(mesh.getSerialEdges().size());
+				solidwireDraw.recount(mesh.getFanFaces().size());
+				debug("new operator stream", operators);
+				debug("new mesh count", mesh.getFanFaces().size());
 			}
 		}
 	}
