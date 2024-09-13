@@ -2,11 +2,12 @@ CXX := g++
 CXXFLAGS := -o
 
 BIN := temp/
+OUT := deploy/
 UTIL := utils/
 LINKS := -lopenGL32 -lmingw32 -lSDL2main -lSDL2 -lglew32
 OBJECTS := $(BIN)camera.o $(BIN)window.o $(BIN)shader.o $(BIN)polyhedra.o $(BIN)model.o
 STATIC := -static
-MAIN := $(CXX) $(CXXFLAGS) polyhedra.exe $(OBJECTS) main.cpp $(LINKS)
+MAIN := $(CXX) $(CXXFLAGS) $(OUT)polyhedra.exe $(OBJECTS) main.cpp $(LINKS)
 
 main: main.cpp $(OBJECTS)
 	$(MAIN)
@@ -27,7 +28,7 @@ $(BIN)model.o: model.cpp model.hpp $(UTIL)debug.hpp
 	$(CXX) -c $(CXXFLAGS) $(BIN)model.o model.cpp
 
 prepare:
-	mkdir temp
+	mkdir $(BIN) $(OUT)
 
 clean:
 	cd temp & del /q /s "*.o" & cd .. & $(MAKE) --no-print-directory main
