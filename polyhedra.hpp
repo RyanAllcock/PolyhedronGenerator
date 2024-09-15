@@ -6,6 +6,7 @@
 #include <list> // list stream elements
 #include <vector> // shape data
 #include <cmath> // seed shape generation
+#include <iostream> // polyhedron data streaming
 
 #include "../utils/maths.hpp"
 

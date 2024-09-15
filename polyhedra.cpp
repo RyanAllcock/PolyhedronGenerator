@@ -1,9 +1,17 @@
 #include "polyhedra.hpp"
-#include "../utils/debug.hpp"
 
 // auxiliary functions
 
 namespace{
+	
+	// debugging presence
+	
+	#ifndef DEBUG_POLYHEDRA
+	template <typename T, typename U>
+	inline void debug(T, U){ printf("debug not set\n");return; }
+	template <typename T>
+	inline void debug(T){ return; }
+	#endif
 	
 	// operator stream
 	
