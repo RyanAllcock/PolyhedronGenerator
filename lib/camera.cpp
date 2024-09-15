@@ -1,5 +1,5 @@
 #include "camera.hpp"
-#include "utils/debug.hpp"
+#include "../utils/debug.hpp"
 
 // transformation methods
 

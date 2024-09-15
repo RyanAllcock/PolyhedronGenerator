@@ -1,8 +1,8 @@
-#include "window.hpp" // scene window
-#include "shader.hpp" // scene display
-#include "camera.hpp" // scene navigation
-#include "polyhedra.hpp" // polyhedron generation
-#include "model.hpp" // polyhedron model representation
+#include "lib/window.hpp" // scene window
+#include "lib/shader.hpp" // scene display
+#include "lib/camera.hpp" // scene navigation
+#include "source/polyhedra.hpp" // polyhedron generation
+#include "lib/model.hpp" // polyhedron model representation
 #include "utils/argument.hpp" // argument fetching
 #include "utils/debug.hpp" // debugging
 #include "utils/filemanager.hpp" // file fetching

@@ -1,5 +1,5 @@
 #include "window.hpp"
-#include "utils/debug.hpp"
+#include "../utils/debug.hpp"
 
 // internal methods
 

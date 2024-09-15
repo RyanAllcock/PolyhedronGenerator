@@ -1,5 +1,5 @@
 #include "polyhedra.hpp"
-#include "utils/debug.hpp"
+#include "../utils/debug.hpp"
 
 // auxiliary functions
 

@@ -1,5 +1,5 @@
 #include "shader.hpp"
-#include "utils/debug.hpp"
+#include "../utils/debug.hpp"
 
 // buffer
 

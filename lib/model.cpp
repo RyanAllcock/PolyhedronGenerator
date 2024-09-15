@@ -1,5 +1,5 @@
 #include "model.hpp"
-#include "utils/debug.hpp"
+#include "../utils/debug.hpp"
 
 namespace{
 	template<typename T, std::size_t N>

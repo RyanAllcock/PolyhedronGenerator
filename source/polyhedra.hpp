@@ -7,7 +7,7 @@
 #include <vector> // shape data
 #include <cmath> // seed shape generation
 
-#include "utils/maths.hpp"
+#include "../utils/maths.hpp"
 
 #ifndef PI
 #define PI 3.141519 // vertex rotation
