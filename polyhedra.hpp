@@ -8,7 +8,7 @@
 #include <cmath> // seed shape generation
 #include <iostream> // polyhedron data streaming
 
-#include "../utils/maths.hpp"
+#include "maths.hpp"
 
 #ifndef PI
 #define PI 3.141519 // vertex rotation
