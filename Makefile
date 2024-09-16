@@ -22,7 +22,7 @@ $(BIN)window.o: $(LIB)window.cpp $(LIB)window.hpp $(UTIL)debug.hpp
 $(BIN)shader.o: $(LIB)shader.cpp $(LIB)shader.hpp $(UTIL)debug.hpp
 	$(CXX) -c -o $(BIN)shader.o $(LIB)shader.cpp
 
-$(BIN)polyhedra.o: $(SRC)polyhedra.cpp $(SRC)polyhedra.hpp $(UTIL)debug.hpp $(UTIL)maths.hpp debug_polyhedra.cpp
+$(BIN)polyhedra.o: $(SRC)polyhedra.cpp $(SRC)polyhedra.hpp $(UTIL)debug.hpp $(SRC)maths.hpp debug_polyhedra.cpp
 	$(CXX) -c -o $(BIN)polyhedra.o debug_polyhedra.cpp
 
 $(BIN)model.o: $(LIB)model.cpp $(LIB)model.hpp $(UTIL)debug.hpp

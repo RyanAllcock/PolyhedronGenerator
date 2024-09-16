@@ -2,11 +2,11 @@
 #include "lib/shader.hpp" // scene display
 #include "lib/camera.hpp" // scene navigation
 #include "source/polyhedra.hpp" // polyhedron generation
+#include "source/maths.hpp" // model rotation
 #include "lib/model.hpp" // polyhedron model representation
 #include "utils/argument.hpp" // argument fetching
 #include "utils/debug.hpp" // debugging
 #include "utils/filemanager.hpp" // file fetching
-#include "utils/maths.hpp" // model rotation
 
 #include <vector> // mesh data
 #include <array> // data passing
