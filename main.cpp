@@ -65,7 +65,7 @@ void exportData(const char *name, std::vector<float> vertices, std::vector<int> 
 		debug("export failed", fileName);
 		return;
 	}
-	fprintf(fp, "o %s\n", fileName.c_str());
+	fprintf(fp, "o %s\n", noCanonName.c_str());
 	for(int i = 0; i < vertices.size(); i += 3) fprintf(fp, "v %.4f %.4f %.4f\n", vertices[i + 0], vertices[i + 1], vertices[i + 2]);
 	for(int i = 0; i < faces.size(); i += 3) fprintf(fp, "f %i %i %i\n", faces[i + 0] + 1, faces[i + 1] + 1, faces[i + 2] + 1);
 	fclose(fp);
