@@ -11,6 +11,7 @@
 #include <vector> // mesh data
 #include <array> // data passing
 #include <list> // list renderers
+#include <stdio.h> // export mesh
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -38,7 +39,8 @@ enum ProgramInput{
 	InputTabout, // window
 	InputSpin, // model
 	InputDual, InputAmbo, InputAkis, InputGyro, InputCanon, // operators
-	InputRevert // polyhedron
+	InputRevert, // polyhedron
+	InputExport // export
 };
 enum ArgumentType{
 	ArgumentOperators, // operator stream
@@ -51,6 +53,25 @@ enum RendererType{
 	RendererLine, 
 	RendererSolidwire
 };
+
+// export
+
+void exportData(const char *name, std::vector<float> vertices, std::vector<int> faces){ // assume triangular faces for import/export simplicity, instead of n-faces for data simplicity
+	std::string noCanonName = name;
+	noCanonName.erase(std::remove(noCanonName.begin(), noCanonName.end(), 'c'), noCanonName.end());
+	std::string fileName = noCanonName + ".obj";
+	FILE *fp = fopen(fileName.c_str(), "a");
+	if(fp == NULL){
+		debug("export failed", fileName);
+		return;
+	}
+	fprintf(fp, "o %s\n", fileName.c_str());
+	for(int i = 0; i < vertices.size(); i += 3) fprintf(fp, "v %.4f %.4f %.4f\n", vertices[i + 0], vertices[i + 1], vertices[i + 2]);
+	for(int i = 0; i < faces.size(); i += 3) fprintf(fp, "f %i %i %i\n", faces[i + 0] + 1, faces[i + 1] + 1, faces[i + 2] + 1);
+	fclose(fp);
+	debug("export success", fileName);
+}
+
 
 int main(int argc, char *argv[]){ 
 	
@@ -97,7 +118,8 @@ int main(int argc, char *argv[]){
 	input.bindAll(std::vector<std::pair<int, WindowKey>>{
 		{InputForward, KeyW}, {InputBackward, KeyS}, {InputLeft, KeyA}, {InputRight, KeyD}, {InputUp, KeySpace}, {InputDown, KeyLeftControl}, 
 		{InputSelect, KeyE}, {InputRelease, KeyTab}, {InputProject, KeyP}, {InputGraphic, KeyG}, {InputTabout, KeyLeftAlt}, 
-		{InputSpin, KeyR}, {InputDual, KeyV}, {InputAmbo, KeyB}, {InputAkis, KeyN}, {InputGyro, KeyM}, {InputCanon, KeyC}, {InputRevert, KeyX}}, window);
+		{InputSpin, KeyR}, {InputDual, KeyV}, {InputAmbo, KeyB}, {InputAkis, KeyN}, {InputGyro, KeyM}, {InputCanon, KeyC}, 
+		{InputRevert, KeyX}, {InputExport, KeyT}}, window);
 	input.bindAll(std::vector<std::pair<int, WindowButton>>{
 		{InputFocus, MouseLeftClick}, {InputTurn, MouseRightClick}}, window);
 	
@@ -310,6 +332,14 @@ int main(int argc, char *argv[]){
 				solidwireDraw.recount(mesh.getFanFaces().size());
 				debug("new operator stream", operators);
 				debug("new mesh count", mesh.getFanFaces().size());
+			}
+			if(input.getPress(InputExport)){
+				Mesh &mesh = polyhedra.back();
+				std::vector<float> vertices = mesh.getSerialVertices();
+				for(float v : mesh.getFanCentreVertices()) vertices.push_back(v);
+				std::vector<int> triangles = mesh.getFanFaces();
+				exportData(operators.c_str(), vertices, triangles);
+				debug("exported data");
 			}
 		}
 	}

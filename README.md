@@ -27,6 +27,7 @@ By implementing these operators, a 3D geometric representation of many polyhedra
 	- *alt* exit window focus
 	- *c v b n m* add *c d a k g* operators to stream, respectively
 	- *x* remove last dynamically-added operator from stream
+	- *t* export current operator stream to file
 
 ## Compilation & Running Requirements
 - Ensure MinGW compiler or compatible alternative is installed and accessible within the folder's environment
