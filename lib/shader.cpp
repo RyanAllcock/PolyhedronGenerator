@@ -2,11 +2,11 @@
 #include "../utils/debug.hpp"
 
 // buffer
-
-Buffer::Buffer(BufferFrequency frequency, GLvoid const *data, GLuint size){
+Buffer::Buffer(BufferFrequency frequency, GLvoid const *data, GLsizeiptr dataSize, GLsizeiptr size){
 	glGenBuffers(1, &id);
 	glBindBuffer(GL_ARRAY_BUFFER, id);
-	glBufferData(GL_ARRAY_BUFFER, size, data, frequency);
+	glBufferData(GL_ARRAY_BUFFER, size, NULL, frequency);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, data);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

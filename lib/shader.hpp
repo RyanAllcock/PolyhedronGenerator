@@ -55,7 +55,7 @@ enum DrawMode{
 
 struct Buffer{
 	GLuint id;
-	Buffer(BufferFrequency frequency, GLvoid const *data, GLuint size);
+	Buffer(BufferFrequency frequency, GLvoid const *data, GLsizeiptr dataSize, GLsizeiptr size);
 	~Buffer();
 	void update(GLvoid const *data, GLsizeiptr size, GLintptr offset) const;
 };

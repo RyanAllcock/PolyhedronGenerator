@@ -147,11 +147,11 @@ int main(int argc, char *argv[]){
 	}
 	
 	// renderer components
-	Buffer vertexBuffer(BufferStatic, polyhedron.getSerialVertices().data(), sizeof(float) * MODEL_MAX_VERTICES * 3);
+	Buffer vertexBuffer(BufferStatic, polyhedron.getSerialVertices().data(), sizeof(float) * polyhedron.getSerialVertices().size(), sizeof(float) * MODEL_MAX_VERTICES * 3);
 	vertexBuffer.update(polyhedron.getFanCentreVertices().data(), sizeof(float) * polyhedron.getFanCentreVertices().size(), sizeof(float) * polyhedron.getSerialVertices().size());
-	Buffer triangleBuffer(BufferStatic, polyhedron.getTriangularFaces().data(), sizeof(int) * MODEL_MAX_FACES);
-	Buffer lineBuffer(BufferStatic, polyhedron.getSerialEdges().data(), sizeof(int) * MODEL_MAX_LINES);
-	Buffer wheelBuffer(BufferStatic, polyhedron.getFanFaces().data(), sizeof(int) * MODEL_MAX_WHEEL_FACES);
+	Buffer triangleBuffer(BufferStatic, polyhedron.getTriangularFaces().data(), sizeof(float) * polyhedron.getTriangularFaces().size(), sizeof(int) * MODEL_MAX_FACES);
+	Buffer lineBuffer(BufferStatic, polyhedron.getSerialEdges().data(), sizeof(float) * polyhedron.getSerialEdges().size(), sizeof(int) * MODEL_MAX_LINES);
+	Buffer wheelBuffer(BufferStatic, polyhedron.getFanFaces().data(), sizeof(float) * polyhedron.getFanFaces().size(), sizeof(int) * MODEL_MAX_WHEEL_FACES);
 	Index vertexIndex(vertexBuffer, 3, IndexFloat, IndexUnchanged, sizeof(float) * 3, 0);
 	Index triangleIndex(triangleBuffer, IndexUint, sizeof(int), 0);
 	Index lineIndex(lineBuffer, IndexUint, sizeof(int), 0);
